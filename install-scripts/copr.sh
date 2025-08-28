@@ -45,12 +45,24 @@ add_config_if_not_present "/etc/dnf/dnf.conf" "fastestmirror=True"
 add_config_if_not_present "/etc/dnf/dnf.conf" "defaultyes=True"
 
 # Enable RPM Fusion repositories
-sudo dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&
+if ! rpm -q rpmfusion-free-release &> /dev/null; then
+  echo "RPM Fusion repositories are not installed. Installing..." | tee -a "$LOG"
+  sudo rpm-ostree install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && sudo rpm-ostree apply-live --allow-replacement
+fi
+
+# Check if rpm-copr is installed
+if ! rpm-copr > /dev/null; then
+  echo "rpm-copr is not installed. Installing..." | tee -a "$LOG"
+  curl -L https://github.com/34N0/rpm-copr/releases/download/v0.9-beta/rpm-copr-v0.9-beta-linux-amd64.tar.gz | sudo tar zx -C /usr/local/bin
+fi
 
 # Enable COPR Repositories
-for repo in "${COPR_REPOS[@]}"; do
-  sudo dnf copr enable -y "$repo" 2>&1 | tee -a "$LOG" || { printf "%s - Failed to enable necessary copr repos\n" "${ERROR}"; exit 1; }
-done
+if ! rpm-copr list | grep -qF "${COPR_REPOS[*]}"; then
+  echo "Enabling necessary COPR repositories..." | tee -a "$LOG"
+  for repo in "${COPR_REPOS[@]}"; do
+    sudo rpm-copr enable "$repo" 2>&1 | tee -a "$LOG" || { printf "%s - Failed to enable necessary copr repos\n" "${ERROR}"; exit 1; }
+  done
+fi
 
 printf "\n%.0s" {1..1}
 
@@ -86,6 +98,6 @@ done
 printf "\n%.0s" {1..1}
 
 # Update package cache and install packages
-sudo dnf update -y
+sudo rpm-ostree update
 
 printf "\n%.0s" {1..2}

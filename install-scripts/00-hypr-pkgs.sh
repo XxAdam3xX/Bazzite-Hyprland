@@ -116,6 +116,9 @@ if [ $overall_failed -ne 0 ]; then
   echo -e "${ERROR} Some packages failed to uninstall. Please check the log."
 fi
 
+sudo rpm-ostree apply-live --allow-replacement
+echo -e "${OK} All conflicting packages are uninstalled."
+
 printf "\n%.0s" {1..1}
 
 # Installation of main components
@@ -124,5 +127,8 @@ printf "\n%s - Installing ${SKY_BLUE}KooL's hyprland necessary packages${RESET} 
 for PKG1 in "${hypr_package[@]}" "${hypr_package_2[@]}" "${copr_packages[@]}" "${Extra[@]}"; do
   install_package "$PKG1" "$LOG"
 done
+
+sudo rpm-ostree apply-live --allow-replacement
+echo -e "${OK} All packages are installed."
 
 printf "\n%.0s" {1..2}

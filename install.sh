@@ -37,7 +37,7 @@ fi
 # install whiptails if detected not installed. Necessary for this version
 if ! command -v whiptail >/dev/null; then
     echo "${NOTE} - whiptail is not installed. Installing..." | tee -a "$LOG"
-    sudo dnf install -y newt
+    sudo rpm-ostree install -y newt && sudo rpm-ostree apply-live --allow-replacement
     printf "\n%.0s" {1..1}
 fi
 
@@ -75,7 +75,7 @@ printf "\n%.0s" {1..1}
 # install pciutils if detected not installed. Necessary for detecting GPU
 if ! rpm -q pciutils > /dev/null; then
     echo "pciutils is not installed. Installing..." | tee -a "$LOG"
-    sudo dnf install -y pciutils
+    sudo rpm-ostree install -y pciutils && sudo rpm-ostree apply-live --allow-replacement
     printf "\n%.0s" {1..1}
 fi
 

@@ -53,19 +53,12 @@ install_package() {
   if rpm -q "$1" &>/dev/null ; then
     echo -e "${INFO} ${MAGENTA}$1${RESET} is already installed. Skipping..."
   else
-    # Run dnf and redirect all output to a log file
+    # Run rpm-ostree and redirect all output to a log file
     (
-      stdbuf -oL sudo dnf install -y "$1" 2>&1
+      stdbuf -oL sudo rpm-ostree install -y "$1" 2>&1
     ) >> "$LOG" 2>&1 &
     PID=$!
     show_progress $PID "$1" 
-
-    # Double check if package is installed
-    if rpm -q "$1" &>/dev/null ; then
-      echo -e "${OK} Package ${YELLOW}$1${RESET} has been successfully installed!"
-    else
-      echo -e "\n${ERROR} ${YELLOW}$1${RESET} failed to install. Please check the $LOG. You may need to install manually."
-    fi
   fi
 }
 
@@ -76,16 +69,20 @@ uninstall_package() {
   # Checking if package is installed
   if rpm -q "$pkg" &>/dev/null; then
     echo -e "${NOTE} removing $pkg ..."
-    sudo dnf remove -y "$pkg" 2>&1 | tee -a "$LOG" | grep -v "error: target not found"
+    sudo rpm-ostree remove -y "$pkg" 2>&1 | tee -a "$LOG" | grep -v "error: target not found"
 
-    if ! rpm -q "$pkg" &>/dev/null; then
-      echo -e "\e[1A\e[K${OK} $pkg removed."
-    else
-      echo -e "\e[1A\e[K${ERROR} $pkg Removal failed. No actions required."
-      return 1
-    fi
   else
     echo -e "${INFO} Package $pkg not installed, skipping."
   fi
   return 0
+}
+
+# Function to verify packages
+verify_package() {
+  #Checking if package is installed
+  if rpm -q "$1" &>/dev/null; then
+    echo -e "${OK} Package ${YELLOW}$1${RESET} is installed."
+  else
+    echo -e "\n${ERROR} ${YELLOW}$1${RESET} failed to verify. Please check the $LOG. You may need to install manually."
+  fi
 }

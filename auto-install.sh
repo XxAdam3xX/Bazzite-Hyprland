@@ -18,7 +18,7 @@ SKY_BLUE="$(tput setaf 6)"
 RESET="$(tput sgr0)"
 
 # Variables
-Distro="Fedora-Hyprland"
+Distro="Bazzite-Hyprland"
 Github_URL="https://github.com/JaKooLit/$Distro.git"
 Distro_DIR="$HOME/$Distro"
 
@@ -27,7 +27,7 @@ printf "\n%.0s" {1..1}
 if ! command -v git &> /dev/null
 then
     echo "${INFO} Git not found! ${SKY_BLUE}Installing Git...${RESET}"
-    if ! sudo dnf install -y git; then
+    if ! rpm -q git > /dev/null; then
         echo "${ERROR} Failed to install Git. Exiting."
         exit 1
     fi

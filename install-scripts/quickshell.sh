@@ -27,7 +27,7 @@ LOG="Install-Logs/install-$(date +%d-%H%M%S)_qshell.log"
 printf "\n%s - Adding ${SKY_BLUE}Quickshell COPR repo${RESET} \n" "${NOTE}"
 
 for repo in "$COPR_QUICK"; do
-  sudo dnf copr enable -y "$repo" 2>&1 | tee -a "$LOG" || { printf "%s - Failed to enable quickshell copr repo\n" "${ERROR}"; exit 1; }
+  sudo rpm-copr enable "$repo" 2>&1 | tee -a "$LOG" || { printf "%s - Failed to enable quickshell copr repo\n" "${ERROR}"; exit 1; }
 done
 
 printf "\n%.0s" {1..1}
